@@ -11,10 +11,11 @@ folder is a future todo. It is excluded from the built package
 | `Manuscript_Figures.R` | `Text/Paper final figures.Rmd` | earlier version of the Rmd; its 113 outputs not in the Rmd are draft plots, none in the paper (code map, Section 1) |
 | `Model_Figures.R` | the Rmd and `R/Polysome_functions_RAUC.R` | older exploratory model figures; local copies of `Ribo_mean`, `Ribo_percent` |
 | `samples.R` | `CalcUnmarkedClass`, `CalcMarkedClass`, `Classes` | its `*NP` solvers equal the main solver with tau = 9 * imax * tau_NP (exact; `tests/testthat/test-equivalence.R`) |
-| `legacy_helpers.R` | nothing needed it | functions cut verbatim from `R/Polysome_functions_RAUC.R`: `CHECK_STEADY_STATE` (broken, KNOWN_FAILURES #4, #5; replaced by the residual test), `plot.series`, `plot.bar`, `plot.bars`, `plot.bars.mat`, `series.mat.plot`, `s2_approx` (only callers were the two scripts above) |
+| `legacy_helpers.R` | the residual test | `CHECK_STEADY_STATE` only, cut verbatim from `R/Polysome_functions_RAUC.R` (broken, KNOWN_FAILURES #4, #5). The plotting helpers (`plot.series`, `plot.bar`, `plot.bars`, `plot.bars.mat`, `series.mat.plot`) and `s2_approx` were first moved here too, then restored to `R/Polysome_functions_RAUC.R` because they are Ricardo's working code and may still be used interactively |
+| `newtau.R` | `CalcUnmarkedClass`, `CalcMarkedClass`, `Classes` | the `_newtau` solver set, deleted in Part C.3 and restored here verbatim; its output equals the first set and the oracle (KNOWN_FAILURES #1) |
 
-The scripts call helpers that now live in `legacy_helpers.R`; to run one,
-source `R/Polysome_functions_RAUC.R` and `legacy_helpers.R` first. They
+To run one of the scripts, source `R/Polysome_functions_RAUC.R` first (and
+`legacy_helpers.R` if it calls `CHECK_STEADY_STATE`). They
 were never runnable top to bottom in a clean session anyway (code map,
 Section 3).
 

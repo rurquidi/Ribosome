@@ -476,3 +476,178 @@ filled.contour2 <- function (x = seq(0, 1, length.out = nrow(z)), y = seq(0, 1,
   invisible()
 }
 
+# Plotting Functions ------------------------------------------------------
+
+
+
+
+plot.series <- function(data,series,par,main){
+  plot(0:(nrow(data)-1),data[,series[1]],type="p",pch=20,col=1,ylim=c(0,max(data)),xlab="Class",ylab="",main=main)
+  lines(0:(nrow(data)-1),data[,series[1]],col=1,lty=2)
+  for(i in 2:length(series[-1])){
+    points(0:(nrow(data)-1),data[,series[i]],col=i,pch=20)
+    lines(0:(nrow(data)-1),data[,series[i]],col=i,lty=i)
+  }
+  leg.titles <- paste(c("k","m","l","t","d")[c(1,2,5)],"=")
+  leg.text <- as.character(unlist(apply(t(apply(par[series,c(1,2,5)],1,function(i) paste(leg.titles,formatC(unlist(i), format = "e", digits = 0), sep=" "))),1,function(j) paste(j,collapse = ", ") )))
+  legend("topright",legend = leg.text,pch = 20 ,col = 1:length(series))
+
+}
+
+
+plot.bar <- function(data,series,pars,main,beside=F){
+  bars.tmp <- barplot(data[,series[1]],ylim=c((max(data[,series])*0.01),max(data[,series])),beside=beside)
+  mtext(text = c(0:(nrow(data)-1))[seq(1,nrow(data),2)],side = 1,
+        at = bars.tmp[seq(1,nrow(data),2)],line = 0.5)
+  mtext(text = c(0:(nrow(data)-1))[seq(2,nrow(data),2)],side = 1,
+        at = bars.tmp[seq(2,nrow(data),2)],line = 1.5)
+  mtext(text="Classes",side = 1,line = 2.5,font=1,cex=1.25)
+  leg.titles <- paste(c("k","m","l","t","d")[c(1,2,5)],"=")
+  leg.text <- as.character(unlist(apply(t(apply(pars[series,c(1,2,5)],1,function(i) paste(leg.titles,formatC(unlist(i), format = "e", digits = 0), sep=" "))),1,function(j) paste(j,collapse = ", ") )))
+  mtext(text=paste(main,leg.text,sep=", "),side=3,line=1,font=2,cex=1.25)
+  # lines(0:(nrow(data)-1),data[,series[1]],col=1,lty=2)
+  # for(i in 2:length(series[-1])){
+  #   points(0:(nrow(data)-1),data[,series[i]],col=i,pch=20)
+  #   lines(0:(nrow(data)-1),data[,series[i]],col=i,lty=i)
+  # }
+
+}
+
+
+plot.bars <- function(unmarked,marked,series,pars,main,
+                      yscale=0.1,xaxt.plot=T,main.plot=T,
+                      log=F,legend.plot=T,pars.leg=F,
+                      global.ymax=NA,beside=F,xaxt.step=1,
+                      set.params=NA){
+  if(is.na(global.ymax)){
+    ymax <- max(unmarked[,series[1]]+marked[,series[1]])
+  } else {
+    ymax <- global.ymax
+  }
+  ymax <- ymax + ymax*yscale
+  if(log==T){
+    ymax <- round(ymax)
+    bars.tmp <- barplot(height = rbind(unmarked[,series[1]],marked[,series[1]]),
+                        ylim=c(1,ymax),col = c("grey80","grey40"),log="y",
+                        beside=beside,xpd =F)
+    #axis(2,at = seq(0,ymax,ymax/4),labels = c("",round(log(seq(0,ymax,ymax/4)[2:5],10),2)))
+  }else{
+    bars.tmp <- barplot(height = rbind(unmarked[,series[1]],marked[,series[1]]),
+                        ylim=c(ymax*0.01,ymax),col = c("grey80","grey40"),
+                        beside=beside,xpd = F)
+  }
+  if(xaxt.plot ==T){
+    if(beside==F){
+      mtext(text = c(0:(nrow(unmarked)-1))[seq(1,nrow(unmarked),xaxt.step)],side = 1,
+            at = bars.tmp[seq(1,nrow(unmarked),xaxt.step)],line = 0.5)
+      if(xaxt.step==2){
+        mtext(text = c(0:(nrow(unmarked)-1))[seq(2,nrow(unmarked),xaxt.step)],side = 1,
+              at = bars.tmp[seq(2,nrow(unmarked),xaxt.step)],line = 1.5)
+      }
+    } else {
+      mtext(text = c(0:(nrow(unmarked)-1))[seq(1,nrow(unmarked),xaxt.step)],side = 1,
+            at = colMeans(bars.tmp[,seq(1,nrow(unmarked),xaxt.step)]),line = 0.5)
+      if(xaxt.step==2){
+        mtext(text = c(0:(nrow(unmarked)-1))[seq(2,nrow(unmarked),xaxt.step)],side = 1,
+              at = colMeans(bars.tmp[,seq(2,nrow(unmarked),xaxt.step)]),line = 1.5)
+      }
+    }
+    mtext(text="Classes",side = 1,line = 2.5,font=1,cex=1.25)
+  }
+  if(any(is.na(set.params))){
+    leg.titles <- paste(c("k","m","l","t","d")[c(1,2,5)],"=")
+    leg.text <- as.character(unlist(apply(t(apply(pars[series,c(1,2,5)],1,function(i) paste(leg.titles,formatC(unlist(i), format = "e", digits = 2), sep=" "))),1,function(j) paste(j,collapse = ", ") )))
+  } else {
+    leg.titles <- set.params
+    leg.text <- as.character(unlist(apply(t(apply(pars[series,..set.params],1,function(i) paste(leg.titles,formatC(unlist(i), format = "e", digits = 2), sep=" "))),1,function(j) paste(j,collapse = ", ") )))
+  }
+
+  if(main.plot == T ){
+    mtext(text=paste(main,leg.text,sep=", "),side=3,line=1,font=2,cex=1.25)
+  }
+  if(legend.plot==T){
+    legend("topright",legend = c("Unmarked","Marked"),fill = c("grey80","grey40"))
+  }
+  if(pars.leg == T){
+    legend("topright",legend = leg.text,bg = rgb(1,1,1,0),box.col = rgb(1,1,1,0))
+  }
+  box()
+}
+
+
+plot.bars.mat <- function(unmarked,marked,series,pars,main,
+                          yscale=0.1,xaxt.plot=T,main.plot=T,
+                          log=F,legend.plot=T,pars.leg=F,beside=T,
+                          xaxt.step=1,global.ymax=F,set.params=NA){
+  if(global.ymax==T){
+    global.ymax <- max(unmarked[,series]+marked[,series])
+  } else {
+    global.ymax <- NA
+  }
+
+  #par(mfrow=c(4,3))
+  count <- 1
+
+  layout.matrix <- t(matrix(c(1:12,0,0,0), nrow = 3, ncol = 5))
+
+  layout(mat = layout.matrix,
+         heights = c(2, 2, 2 ,2,1), # Heights of the two rows
+         widths = c(2, 2, 2)) # Widths of the two columns
+
+
+  for(i in series){
+    par(mar=c(0,2,1,1))
+    if(count<9){
+      plot.bars(unmarked = unmarked,marked = marked,series=i,
+                pars=pars,main=main,yscale=yscale,
+                xaxt.plot = F,main.plot = F,legend.plot = F,
+                pars.leg = T,log = log,global.ymax = global.ymax,
+                beside=beside,xaxt.step = xaxt.step,set.params=set.params)
+    }else {
+      par(mar=c(0,2,1,1))
+      plot.bars(unmarked = unmarked,marked = marked,series=i,
+                pars=pars,main=main,yscale=yscale,
+                xaxt.plot = T,main.plot = F,legend.plot = F,
+                pars.leg = T,log = log,global.ymax = global.ymax,
+                beside=beside,xaxt.step = xaxt.step,set.params=set.params)
+    }
+    count <- count+1
+  }
+  plot(1:nrow(unmarked),rep(0,nrow(unmarked)),axes=F,col=rgb(0,0,0,0),ylab="",xlab="")
+  legend("center",legend = c("Unmarked","Marked"),fill = c("grey80","grey40"),cex = 1.25)
+}
+
+series.mat.plot <- function(parameters,Unmarked,Marked,group.by ="kappa",set.params = c("mu","tau"),file.loc="",log=F,beside=T,xaxt.step=5,global.ymax=F){
+  if(is.character(group.by)){
+    groupsize <-nrow(unique(parameters[,..group.by]))
+  }else if(is.numeric(group.by)){
+    groupsize <- group.by
+  }
+
+  series.mat <- t(matrix(1:nrow(parameters),nrow=groupsize))
+  for(i in 1:(nrow(parameters)/groupsize)){
+    print(i)
+    series <- unlist(series.mat[i,])
+    pars=parameters
+    leg.titles <- set.params
+    leg.text <- as.character(unlist(apply(t(apply(pars[series[1],..set.params],1,function(i) paste(leg.titles,formatC(unlist(i), format = "e", digits = 0), sep="_"))),1,function(j) paste(j,collapse = "_") )))
+    png(paste(file.loc,"/",group.by,"series","_",leg.text,"_globalymax",global.ymax,"_log",log,"_imax",nrow(Unmarked)-1,".png",sep=""),width = 8,height = 6,res = 600,units = "in")
+    plot.bars.mat(unmarked = Unmarked,marked = Marked,series = series,
+                  pars=parameters,main="Sum classes. l=1, d=10^5",log=log,beside=beside,xaxt.step = xaxt.step,global.ymax = global.ymax,set.params=set.params)
+    dev.off()
+  }
+
+}
+
+
+
+s2_approx <- function(parameters,imax,mean){
+  if(is.null(names(parameters))){
+    names(parameters) <- par.names
+  }
+  #load parameters
+  tau <- parameters["tau"]
+  kappa <- parameters["kappa"]
+  mu <- parameters["mu"]
+  approx <- 0.5*(kappa+(mean/imax)*(kappa-tau))/((kappa+tau)/imax-mu)
+}
